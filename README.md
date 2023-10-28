@@ -1,5 +1,7 @@
 # Godot Panorama Renderer.
 
+![](https://github.com/revpriest/godotPanoRenderer/blob/main/OutputPanorama.png?raw=true)
+
 ## Rendering a 3D Stereoscopic 360 degree view of the scene.
 
 Rendering an equirectangular 360-degree 3d-stereoscopic 
