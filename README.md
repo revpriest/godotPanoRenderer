@@ -37,7 +37,7 @@ You may want to create a background panorama of your scene for environment mappi
 
 ## Licence
 
-Same licence as Godot, whatever that is.
+Licence is CC0, do whatever you want.
 
 ## Install
 
