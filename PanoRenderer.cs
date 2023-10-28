@@ -54,6 +54,7 @@ public partial class PanoRenderer : Node3D {
 	internal float near_clip=0.01f;
 	[Export]
 	internal float far_clip=10000f;
+  internal bool camsAttached=false;
 
 	/**
 	* Start
@@ -77,24 +78,53 @@ public partial class PanoRenderer : Node3D {
 			cams.Add(c);
 			viewports.Add(s);
 		}
+		camsAttached=true;
+		removeCams();
 	}
 
 	/**
 	* Update
 	*/
 	public override void _Process(double delta) {
-		setupCamPos(colNum);
 		if(colNum>=0){
+			addCams();
+			setupCamPos(colNum);
+	    RenderingServer.FramePostDraw+=doCaptureAfterRender;
+		}else{
+			removeCams();
+		}
+	}
+
+
+	/**
+	* Add the cams and view ports to the node tree
+	* we are doing a render
+	*/
+	public void addCams(){
+		if(!camsAttached){
+			camsAttached=true;
 			foreach(SubViewport s in viewports){
 				s.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
+				this.AddChild(s);
 			}
-	        RenderingServer.FramePostDraw+=doCaptureAfterRender;
-		}else{
+		}
+	}
+
+
+	/**
+	* Remove the cams and view ports from the node tree
+	* we are doing a render
+	*/
+	public void removeCams(){
+		if(camsAttached){
+			camsAttached=false;
 			foreach(SubViewport s in viewports){
+				this.RemoveChild(s);
 				s.RenderTargetUpdateMode = SubViewport.UpdateMode.Disabled;
 			}
 		}
 	}
+	
 
 	/**
 	* Render a single column.
