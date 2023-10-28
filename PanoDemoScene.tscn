@@ -1,0 +1,184 @@
+[gd_scene load_steps=11 format=3 uid="uid://bv404hbuetyui"]
+
+[ext_resource type="Script" path="res://PanoDemoCode.cs" id="1_3qo1c"]
+[ext_resource type="Script" path="res://PanoRenderer.cs" id="2_arw56"]
+
+[sub_resource type="PlaneMesh" id="PlaneMesh_088io"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cy0tf"]
+albedo_color = Color(0.113725, 0.270588, 0.105882, 1)
+
+[sub_resource type="BoxMesh" id="BoxMesh_o375t"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_rfn4x"]
+albedo_color = Color(1, 0.470588, 0.196078, 1)
+
+[sub_resource type="CylinderMesh" id="CylinderMesh_3vhoe"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cxtqu"]
+albedo_color = Color(0.345098, 0.345098, 0.807843, 1)
+
+[sub_resource type="SphereMesh" id="SphereMesh_8ee75"]
+
+[sub_resource type="StandardMaterial3D" id="StandardMaterial3D_cf7qo"]
+albedo_color = Color(0.65098, 0.180392, 0.521569, 1)
+
+[node name="PanoDemoScene" type="Node3D"]
+script = ExtResource("1_3qo1c")
+
+[node name="WorldEnvironment" type="WorldEnvironment" parent="."]
+
+[node name="Camera3D" type="Camera3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.748743, 0)
+
+[node name="PanoRenderer" type="Node3D" parent="."]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.840663, 0)
+script = ExtResource("2_arw56")
+numCamPairs = 128
+
+[node name="Objects" type="Node3D" parent="."]
+
+[node name="floor" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(5.075, 0, 0, 0, 5.075, 0, 0, 0, 5.075, 0, 0, 0)
+mesh = SubResource("PlaneMesh_088io")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cy0tf")
+
+[node name="Block" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, -2.09137, 0.509092, 1.69749)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block2" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, -0.359698, 0.509092, 1.69749)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block6" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, 3.97724, 0.509092, -3.28351)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block7" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, -1.52087, 4.95372, 0.243492)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block3" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, 1.42082, 0.509092, 0.0502419)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block4" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, 0.0846193, 0.509092, -3.15372)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block8" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, 0.570708, 0.509092, -1.95015)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block9" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, -1.47759, 0.509092, -0.347653)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block10" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, 2.08728, 0.509092, -0.178168)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block11" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(0.435, 0, 0, 0, 1, 0, 0, 0, 0.485, -0.0537928, 0.509092, 2.39483)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Block5" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1.04, 0, 0, 0, 2.465, 0, 0, 0, 1.275, -3.09123, 0.917792, -3.15372)
+mesh = SubResource("BoxMesh_o375t")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_rfn4x")
+
+[node name="Silly" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 2.5391, 1.07886, -1.64121)
+mesh = SubResource("CylinderMesh_3vhoe")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cxtqu")
+
+[node name="Silly2" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.4891, 1.07886, 0.934666)
+mesh = SubResource("CylinderMesh_3vhoe")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cxtqu")
+
+[node name="Silly3" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.13594, 1.07886, 3.616)
+mesh = SubResource("CylinderMesh_3vhoe")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cxtqu")
+
+[node name="Sphe" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -1.0607, 0.459896, -2.43644)
+mesh = SubResource("SphereMesh_8ee75")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cf7qo")
+
+[node name="Sphe2" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.77229, 0.459896, 2.73276)
+mesh = SubResource("SphereMesh_8ee75")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cf7qo")
+
+[node name="Sphe4" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0834, 0.459896, 2.73276)
+mesh = SubResource("SphereMesh_8ee75")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cf7qo")
+
+[node name="Sphe5" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 3.0834, 0.459896, 4.11981)
+mesh = SubResource("SphereMesh_8ee75")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cf7qo")
+
+[node name="Sphe3" type="MeshInstance3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -2.20133, 0.459896, 0.0126522)
+mesh = SubResource("SphereMesh_8ee75")
+skeleton = NodePath("../..")
+surface_material_override/0 = SubResource("StandardMaterial3D_cf7qo")
+
+[node name="Label3D" type="Label3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0, 0.81551, -1.63946)
+text = "Press R to render a panorama"
+
+[node name="OmniLight3D3" type="OmniLight3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.170844, 1.9278, 2.89459)
+layers = 1048575
+light_energy = 10.753
+distance_fade_begin = 950.22
+distance_fade_length = 4096.0
+
+[node name="OmniLight3D4" type="OmniLight3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, 0.170844, 1.9278, -1.56277)
+layers = 1048575
+light_energy = 10.753
+distance_fade_begin = 950.22
+distance_fade_length = 4096.0
+
+[node name="OmniLight3D5" type="OmniLight3D" parent="Objects"]
+transform = Transform3D(1, 0, 0, 0, 1, 0, 0, 0, 1, -3.92591, 1.9278, -1.56277)
+layers = 1048575
+light_energy = 10.753
+distance_fade_begin = 950.22
+distance_fade_length = 4096.0
