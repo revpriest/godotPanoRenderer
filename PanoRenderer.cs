@@ -54,7 +54,10 @@ public partial class PanoRenderer : Node3D {
 	internal float near_clip=0.01f;
 	[Export]
 	internal float far_clip=10000f;
-  internal bool camsAttached=false;
+	[Export]
+	internal uint maskLayers = 1+2+4+8+16+32+64+128+256+512+1024+2048+4096+8192+16384+32768+65536+131072; //262144+524288
+  	internal bool camsAttached=false;
+
 
 	/**
 	* Start
@@ -68,12 +71,14 @@ public partial class PanoRenderer : Node3D {
 			s.Size = new Vector2I(5,outTexSize/4);		//If we have a 1-pixel image here, we lose all the lighting from the scene!? Lowest we can go is 5.
 			s.RenderTargetUpdateMode = SubViewport.UpdateMode.Always;
 			s.PositionalShadowAtlasSize = 4096;
+			s.CanvasCullMask=maskLayers;
 			this.AddChild(s);
 			Camera3D c = new Camera3D();
 			c.Fov = 90;
 			c.Near = near_clip;
 			c.Far = far_clip;
 			c.KeepAspect = Camera3D.KeepAspectEnum.Height;
+			c.CullMask = maskLayers;
 			s.AddChild(c);
 			cams.Add(c);
 			viewports.Add(s);
@@ -149,21 +154,18 @@ public partial class PanoRenderer : Node3D {
 			c.GlobalRotation = GlobalRotation;
 			if(i<(cams.Count/2)){
 				//Left Eye
-				c.GlobalPosition += new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
+				c.Position += new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
 			}else{
 				//Right Eye
-				c.GlobalPosition -= new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
+				c.Position -= new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
 			}
 			if((i%(numCamPairs*2))<numCamPairs){
 				//Top
-				c.Rotation = new Vector3( (c.Rotation.X)-(Mathf.Pi/4), 
-										   c.Rotation.Y - Mathf.Pi + (float)colAngle + (float)camAngle, 
-										   c.Rotation.Z);
+				c.Rotate(c.Basis.Y,- Mathf.Pi + (float)colAngle + (float)camAngle);
+				c.Rotate(c.Basis.X,-Mathf.Pi/4);
 			}else{
-				//Bottom
-				c.Rotation = new Vector3( (c.Rotation.X)+(Mathf.Pi/4), 
-										   c.Rotation.Y - Mathf.Pi  + (float)colAngle + (float)camAngle, 
-										   c.Rotation.Z);
+				c.Rotate(c.Basis.Y,- Mathf.Pi + (float)colAngle + (float)camAngle);
+				c.Rotate(c.Basis.X,+Mathf.Pi/4);
 			}
 			i++;
 		}
@@ -248,8 +250,8 @@ public partial class PanoRenderer : Node3D {
 	* They all like that. It's some sort of angle presumably. 
 	*/
 	public void warpToEquirectangular(){
-		float startTime = Time.GetTicksMsec();
-		GD.Print("Starting perspective warp at "+startTime);		
+		//float startTime = Time.GetTicksMsec();
+		//GD.Print("Starting perspective warp at "+startTime);		
 		byte[] sourceBytes = outputImg.GetData();
 		byte[] destBytes = new byte[sourceBytes.Length];
 		int w = outputImg.GetWidth();
@@ -271,10 +273,10 @@ public partial class PanoRenderer : Node3D {
 
 
 		outputImg.SetData(w,h,false,outputImg.GetFormat(),destBytes);
-		float endTime = Time.GetTicksMsec();
-		float diffTime = endTime-startTime;
-		GD.Print("Ending perspective warp at "+endTime);		
-		GD.Print("I mean you could try and rewrite as a shader, but you'd only save "+diffTime+" ms per frame");   //756 on my machine 		
+		//float endTime = Time.GetTicksMsec();
+		//float diffTime = endTime-startTime;
+		//GD.Print("Ending perspective warp at "+endTime);		
+		//GD.Print("I mean you could try and rewrite as a shader, but you'd only save "+diffTime+" ms per frame");   //756 on my machine 		
 	}
 
 	/**
@@ -295,4 +297,5 @@ public partial class PanoRenderer : Node3D {
 	}
 
 }
+
 
