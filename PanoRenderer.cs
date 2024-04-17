@@ -1,6 +1,7 @@
 using Godot;
 using System;
 using System.Collections.Generic;
+using System.Security.Cryptography;
 
 /**
 * A panorama renderer which will create an image such as you
@@ -47,11 +48,11 @@ public partial class PanoRenderer : Node3D {
 	[Export]
 	internal int outTexSize = 4096;
 	[Export]
-	internal int numCamPairs = 64;
+	internal int numCamPairs = 256;
 	[Export]
-	internal float eyeSeparation = 0.0333f;
+	internal float eyeSeparation = 0.03f;
 	[Export]
-	internal float near_clip=0.01f;
+	internal float near_clip=0.03f;
 	[Export]
 	internal float far_clip=10000f;
 	[Export]
@@ -146,7 +147,7 @@ public partial class PanoRenderer : Node3D {
 	*/
 	private void setupCamPos(int col){
 		int i=0;
-		float colAngle = (((float)numCamPairs-col) / (outTexSize/numCamPairs) * (Mathf.Pi*2/numCamPairs));
+		float colAngle = (((float)numCamPairs-col) / (outTexSize/numCamPairs) * (Mathf.Pi*2/numCamPairs)) + MathF.PI;
 		foreach(Camera3D c in cams){
 			int dir = i%numCamPairs;
 			float camAngle = (numCamPairs-dir) * ((MathF.PI*2)/numCamPairs);
@@ -187,8 +188,8 @@ public partial class PanoRenderer : Node3D {
 			int dir = i%numCamPairs;
 			x+=dir*(outTexSize/numCamPairs);
 			int y=0;
-			if(i>=(viewports.Count/2)){
-				//Right eye is bottom.
+			if(i<(viewports.Count/2)){
+				//One eye is top, one bottom.
 				y=outTexSize/2;
 			}
 			if((i%(numCamPairs*2))<numCamPairs){
@@ -202,9 +203,9 @@ public partial class PanoRenderer : Node3D {
 		if(colNum<(outTexSize/numCamPairs)){
 			colNum++;
 		}else{
-			//That's it we're all done, we have the final image.
-			//Except! No! It's perspective projection not equirectangular!?
+			//It's finished! One final step..
 			warpToEquirectangular();
+			//Then mark as done.
 			colNum=-1;
 		}
 	}
@@ -218,36 +219,30 @@ public partial class PanoRenderer : Node3D {
 	* eh? Why we gotta warp it to make it equirectangular when that
 	* is definitely going to lose detail and precision now innit?
 	*
-	* Oh well, we must conform to the expectations of the VR
-	* player demands and take our 180-degrees perspective projection
-	* and turn it into an 180-degrees equirectangular projection.
+	* It's not a big change, but I think it maybe helps a lot
+	* with looking at strange angles, especially for binocular
+	* vision when looking up or down. Proportions look slightly off.
 	*
-	* Can't honestly say I'm really sure what the difference is.
-	* 
-	* So How do we do that?
+	* So we have to morph from the old image into the new.
+	* Row by row. We can go one row at a time, find which 
+	* source-row to copy into the row in the dest image and
+	* then copy it pixel by pixel. Worse. Colour-component by colour-compnent.
 	*
-	* Probably fastest would be some sort of shader but I don't
-	* really know how to do that, so here we just take a byte[]
-	* array and copy it warped into another byte array pixel
-	* by damned pixel.
-	* 
-	* The source-pixel has the same X-coord but it's Y-coord
-	* shoule be, according to people from Google good at maths:
-	*
+	* Lets try: [ https://www.videopoetics.com/tutorials/capturing-stereoscopic-panoramas-unity/ ]
 	* > float phi = fmod(y, 0.5) * 2 * 1.570796 - 0.7853982;
 	* > y = tan(phi) * 0.25 + 0.25 + step(0.5, y) * 0.5;
 	*
-	* Two of those numbers are PI I expect, I hope Mathf has a
-	* step and a fmod function or else I'll have to find out 
-	* what they are....
-    *
-	* Or I can ask the chatbot who says:
-	* double phi = Math.IEEERemainder(y, 0.5) * 2 * Mathf.PI / 2 - Mathf.PI / 4;
-	* double output = Math.Tan(phi) * 0.25 + 0.25 + (y >= 0.5 ? 0.5 : 0);
+	* That turned out to be doing the exact opposite of what we 
+	* want I think? It stretched it vertically so the round
+	* things looked like elipses and the rectangles morphed as
+	* they moved.
 	*
-	* I don't know why they chose a greek letter instead of
-	* a descriptive name or what phi is. Mathematicians be crazy.
-	* They all like that. It's some sort of angle presumably. 
+	* Reversing it here is, better? Still not sure it's right
+	* really. Not even entirely sure it's better than just
+	* the perspective projection without any post-frame morph at all.
+	*
+	* But this is the best I got. Maths people please do submit
+	* better code, I ain't got a clue what this is doing really.
 	*/
 	public void warpToEquirectangular(){
 		//float startTime = Time.GetTicksMsec();
@@ -256,28 +251,79 @@ public partial class PanoRenderer : Node3D {
 		byte[] destBytes = new byte[sourceBytes.Length];
 		int w = outputImg.GetWidth();
 		int h = outputImg.GetHeight();
+		int h2=h>>1;
 		int pixellength = sourceBytes.Length/h/w;
 
-		for(int y=0; y<h; y++){
-			for(int x=0; x<w; x++){
-				float dy = ((float)y)/h;
-			    float phi = dy % 0.5f * 2 * Mathf.Pi / 2 - Mathf.Pi / 4;
-				float sy = Mathf.Tan(phi) * 0.25f + 0.25f + (dy < 0.5f ? 0.5f : 0);
-				int isy = Mathf.FloorToInt(sy * h);
-				for(int col=0;col<pixellength;col++){
-					      destBytes[col + pixellength * x + pixellength * w * y] = 
-						sourceBytes[col + pixellength * x + pixellength * w * isy];
+		for(int eye=0;eye<2;eye++){
+			for(int y=0; y<h2; y++){
+				float dy = ((float)y)/(h2);
+
+				float t = (dy - 0.5f) / 0.5f;
+				float tmp = Mathf.Atan(t);
+				float sourceY = (tmp + (Mathf.Pi / 4)) / (Mathf.Pi/2);
+
+				int sourceYPix = Mathf.FloorToInt(sourceY * h2);
+				if(sourceYPix>h2-1){
+					sourceYPix=h2-1;
+				}
+				if(sourceYPix<0){
+					sourceYPix=0;
+				}
+				for(int x=0; x<w; x++){
+					for(int col=0;col<pixellength;col++){
+						  destBytes[col + (pixellength * x) + (pixellength * w *          y) + (eye * h2 * w * pixellength)] = 
+						sourceBytes[col + (pixellength * x) + (pixellength * w * sourceYPix) + (eye * h2 * w * pixellength)];
+					}
 				}
 			}
 		}
-
-
 		outputImg.SetData(w,h,false,outputImg.GetFormat(),destBytes);
 		//float endTime = Time.GetTicksMsec();
 		//float diffTime = endTime-startTime;
 		//GD.Print("Ending perspective warp at "+endTime);		
 		//GD.Print("I mean you could try and rewrite as a shader, but you'd only save "+diffTime+" ms per frame");   //756 on my machine 		
 	}
+
+	/**
+	* Here's the original code doing the warp as described
+	* in the Unity/Google paper. As I say, this is definitely
+	* worse than just the perspective projection with no warp
+	* at all, but seems to be doing bascially the oposite of
+	* what we want? 
+	*/	
+	public void warpToEquirectangularOldBackwards(){
+		byte[] sourceBytes = outputImg.GetData();
+		byte[] destBytes = new byte[sourceBytes.Length];
+		int w = outputImg.GetWidth();
+		int h = outputImg.GetHeight();
+		int h2=h>>1;
+		int pixellength = sourceBytes.Length/h/w;
+
+		for(int eye=0;eye<2;eye++){
+			for(int y=0; y<h2; y++){
+				float dy = ((float)y)/(h2);
+
+				float tmp = y * (Mathf.Pi/2) - (Mathf.Pi / 4);
+				float sourceY = Mathf.Tan(tmp) * 0.5f + 0.5f;
+
+				int sourceYPix = Mathf.FloorToInt(sourceY * h2);
+				if(sourceYPix>h2-1){
+					sourceYPix=h2-1;
+				}
+				if(sourceYPix<0){
+					sourceYPix=0;
+				}
+				for(int x=0; x<w; x++){
+					for(int col=0;col<pixellength;col++){
+						  destBytes[col + (pixellength * x) + (pixellength * w *          y) + (eye * h2 * w * pixellength)] = 
+						sourceBytes[col + (pixellength * x) + (pixellength * w * sourceYPix) + (eye * h2 * w * pixellength)];
+					}
+				}
+			}
+		}
+		outputImg.SetData(w,h,false,outputImg.GetFormat(),destBytes);
+	}
+
 
 	/**
 	* Start a render, it'll take many frames
