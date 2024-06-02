@@ -48,7 +48,7 @@ public partial class PanoRenderer : Node3D {
 	[Export]
 	internal int outTexSize = 4096;
 	[Export]
-	internal int numCamPairs = 256;
+	internal int numCamPairs = 8;
 	[Export]
 	internal float eyeSeparation = 0.03f;
 	[Export]
@@ -161,10 +161,11 @@ public partial class PanoRenderer : Node3D {
 				c.Position -= new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
 			}
 			if((i%(numCamPairs*2))<numCamPairs){
-				//Top
+				//Top of timage
 				c.Rotate(c.Basis.Y,- Mathf.Pi + (float)colAngle + (float)camAngle);
 				c.Rotate(c.Basis.X,-Mathf.Pi/4);
 			}else{
+				//Bottom of image
 				c.Rotate(c.Basis.Y,- Mathf.Pi + (float)colAngle + (float)camAngle);
 				c.Rotate(c.Basis.X,+Mathf.Pi/4);
 			}
@@ -188,7 +189,7 @@ public partial class PanoRenderer : Node3D {
 			int dir = i%numCamPairs;
 			x+=dir*(outTexSize/numCamPairs);
 			int y=0;
-			if(i<(viewports.Count/2)){
+			if(i>=(viewports.Count/2)){
 				//One eye is top, one bottom.
 				y=outTexSize/2;
 			}
@@ -343,5 +344,4 @@ public partial class PanoRenderer : Node3D {
 	}
 
 }
-
 
