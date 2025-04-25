@@ -153,21 +153,21 @@ public partial class PanoRenderer : Node3D {
 			float camAngle = (numCamPairs-dir) * ((MathF.PI*2)/numCamPairs);
 			c.GlobalPosition = GlobalPosition;
 			c.GlobalRotation = GlobalRotation;
-			if(i<(cams.Count/2)){
+			if(i>=(cams.Count/2)){
 				//Left Eye
-				c.Position += new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
+				c.GlobalPosition += c.GlobalBasis * new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
 			}else{
 				//Right Eye
-				c.Position -= new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
+				c.GlobalPosition -= c.GlobalBasis * new Vector3(-Mathf.Cos(camAngle+colAngle), 0, Mathf.Sin(camAngle+colAngle)) * eyeSeparation;
 			}
 			if((i%(numCamPairs*2))<numCamPairs){
-				//Top of timage
-				c.Rotate(c.Basis.Y,- Mathf.Pi + (float)colAngle + (float)camAngle);
-				c.Rotate(c.Basis.X,-Mathf.Pi/4);
+				//Top of image
+				c.Rotate(c.GlobalBasis.Y, -Mathf.Pi + (float)colAngle + (float)camAngle);
+				c.Rotate(c.GlobalBasis.X, -Mathf.Pi/4);
 			}else{
 				//Bottom of image
-				c.Rotate(c.Basis.Y,- Mathf.Pi + (float)colAngle + (float)camAngle);
-				c.Rotate(c.Basis.X,+Mathf.Pi/4);
+				c.Rotate(c.GlobalBasis.Y, -Mathf.Pi + (float)colAngle + (float)camAngle);
+				c.Rotate(c.GlobalBasis.X, +Mathf.Pi/4);
 			}
 			i++;
 		}
@@ -205,7 +205,7 @@ public partial class PanoRenderer : Node3D {
 			colNum++;
 		}else{
 			//It's finished! One final step..
-			warpToEquirectangular();
+			//warpToEquirectangular();
 			//Then mark as done.
 			colNum=-1;
 		}
